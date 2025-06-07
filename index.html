@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Model Viewer Template</title>
+  <meta charset="utf-8" />
+  <meta name="description" content="Model Viewer Template" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Model Viewer library -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #fff0f5; /* pastel blush pink */
+      color: #5c3757; /* soft plum */
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    /* Main container: split left (controls) and right (model) */
+    .main-container {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      max-width: 1100px;
+      gap: 2rem;
+    }
+
+    /* Left panel for buttons */
+    .controls {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 1rem;
+      box-sizing: border-box;
+    }
+
+    /* Right panel for model */
+    .model-wrapper {
+      flex: 1;
+      max-width: 700px;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 500px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      background-color: #ffe6f0; /* soft peachy background */
+    }
+
+    /* Hotspot Styling */
+    .Hotspot {
+      background-color: #ffcce0;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .HotspotAnnotation {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 6px 12px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #5c3757;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Buttons */
+    button {
+      background-color: #f8b4d9;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      background-color: #f48fb1;
+    }
+
+    /* AR Button */
+    #ar-button {
+      background-color: #dba6cb;
+      color: #fff;
+      margin-top: 1rem;
+      width: auto;
+    }
+
+    /* AR Prompt Image */
+    #ar-prompt img {
+      width: 100px;
+      margin: 1rem auto;
+      display: block;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #ffe6f0;
+      border-radius: 3px;
+      margin: 1rem 0;
+    }
+
+    .update-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #f48fb1;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    /* Grouping for sets of buttons */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      text-align: left;
+    }
+
+    .control-group > strong {
+      margin-bottom: 0.5rem;
+      color: #5c3757;
+    }
+
+    /* Responsive: on small screens stack vertically */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem 0.5rem;
+      }
+      .main-container {
+        flex-direction: column;
+        max-width: 100%;
+      }
+      .controls, .model-wrapper {
+        max-width: 100%;
+        height: auto;
+      }
+      model-viewer {
+        height: 350px;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>3D Model Viewer</h1>
+
+  <div class="main-container">
+    <div class="controls">
+      <!-- Orbit Control Buttons -->
+      <div class="control-group">
+        <strong>Orbit Controls</strong>
+        <button onClick="setOrbit('331.4deg 0.3876deg 413.8m','30deg')">Main Vase</button>
+        <button onClick="setOrbit('369deg 124.5deg 413.8m','30deg')">Water Collector</button>
+        <button onClick="setOrbit('327.1deg 155.3deg 314.5m','30deg')">Dish</button>
+      </div>
+
+      <!-- Variant Buttons -->
+      <div class="control-group">
+        <strong>Variants</strong>
+        <button onClick="VBtn01()">Colour 1</button>
+        <button onClick="VBtn02()">Colour 2</button>
+        <button onClick="VBtn03()">Colour 3</button>
+      </div>
+
+      <!-- Animation Buttons -->
+      <div class="control-group">
+        <strong>Animations</strong>
+        <button onclick="mainvaseanimate()">Main Vase animation</button>
+        <button onclick="watercollectoranimate()">Water Collector animation</button>
+        <button onclick="dishanimate()">Dish animation</button>
+        <button onclick="pauseAnimate()">Pause animation</button>
+        <button onclick="playAnimate()">Play animation</button>
+      </div>
+
+      <button id="ar-button">View in your space</button>
+    </div>
+
+    <div class="model-wrapper">
+      <model-viewer
+        id="Pitcher"
+        src="Pitcher Vase.glb"
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        camera-controls
+        tone-mapping="neutral"
+        poster="poster.jpeg"
+        shadow-intensity="1.32"
+        animation-name="water collect 1Action"
+        exposure="0.54"
+        shadow-softness="1"
+        auto-rotate
+        camera-orbit="122.2deg 76.94deg 413.8m"
+        field-of-view="30deg"
+      >
+        <button
+          class="Hotspot"
+          slot="hotspot-1"
+          data-surface="0 0 27173 27472 27473 0.165 0.347 0.488"
+          data-visibility-attribute="visible"
+          aria-label="Main Vase hotspot"
+        >
+          <div class="HotspotAnnotation">Main Vase</div>
+        </button>
+        <button
+          class="Hotspot"
+          slot="hotspot-2"
+          data-surface="1 0 1404 1388 1389 0.233 0.489 0.278"
+          data-visibility-attribute="visible"
+          aria-label="Water Collector hotspot"
+        >
+          <div class="HotspotAnnotation">Water Collector</div>
+        </button>
+        <button
+          class="Hotspot"
+          slot="hotspot-3"
+          data-surface="2 0 1921 1927 1922 0.246 0.316 0.438"
+          data-visibility-attribute="visible"
+          aria-label="Dish hotspot"
+        >
+          <div class="HotspotAnnotation">Dish</div>
+        </button>
+
+        <div class="progress-bar hide" slot="progress-bar">
+          <div class="update-bar"></div>
+        </div>
+
+        <button slot="ar-button" id="ar-button">View in your space</button>
+
+        <div id="ar-prompt" class="hide">
+          <img src="ar_hand_prompt.png" alt="AR prompt" />
+        </div>
+      </model-viewer>
+    </div>
+  </div>
+
+  <script>
+    function setOrbit(orbit, fov) {
+      const model = document.getElementById('Pitcher');
+      model.cameraOrbit = orbit;
+      model.fieldOfView = fov;
+      model.jumpCameraToGoal();
+    }
+
+    function VBtn01() {
+      document.getElementById('Pitcher').variantName = 'Colour Variant 1';
+    }
+    function VBtn02() {
+      document.getElementById('Pitcher').variantName = 'Colour Variant 2';
+    }
+    function VBtn03() {
+      document.getElementById('Pitcher').variantName = 'Colour Variant 3';
+    }
+
+    function mainvaseanimate() {
+      document.getElementById('Pitcher').animationName = 'main vase 1Action';
+    }
+    function watercollectoranimate() {
+      document.getElementById('Pitcher').animationName = 'water collect 1Action';
+    }
+    function dishanimate() {
+      document.getElementById('Pitcher').animationName = 'dish 1Action';
+    }
+
+    function pauseAnimate() {
+      document.getElementById('Pitcher').pause();
+    }
+    function playAnimate() {
+      document.getElementById('Pitcher').play();
+    }
+  </script>
+</body>
+</html>
